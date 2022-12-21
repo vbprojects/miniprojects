@@ -1,4 +1,4 @@
-using LinearAlgebra, MLDatasets,  Images, LambdaFn, Zygote
+using LinearAlgebra, MLDatasets, Images, LambdaFn, CUDA, Plots
 
 #import MNIST DATA
 X, y = MNIST.traindata(Float32)
@@ -11,18 +11,6 @@ ftrain[1] |> @lf(reshape(_', 28, 28)) .|> Gray
 
 vis(X) = X |> @lf(reshape(_', 28, 28)) .|> Gray
 
-Dense(input, output) = rand(input, output) .* .05
-
-ftrain[1] + ftrain[2] |> vis
-
-ftrain[1]' * Dense(28*28, 2000)
-
-D1 = Dense(2000, 28*28)
-D2 = Dense(2000, 2000)
-D3 = Dense(2000, 2000)
-
-(ftrain[1]' * D1) * D2 * D3
-
 relu(x) = max.(x, 0)
 sigmoid(x) = 1 / (1 + exp(-x))
 
@@ -31,16 +19,10 @@ function goodness(D, X)
     return sigmoid(sum((D * X) .^ 2) - .5)
 end
 
-goodness(D1, ftrain[5])
-
 neg = (ftrain[4] .+ ftrain[10]) ./ 2
 neg |> vis
 
 goodness(D1, neg)
-
-(D1 * neg)
-
-D1 = (rand(400, 28*28) .- .5) ./ (28*28)
 
 function minmaxnorm(x)
     minval = minimum(x)
@@ -54,15 +36,62 @@ grad(W, x) = 2 .* relu.(W * x) .* drelu.(W * x) * x'
 
 grad(D1, ftrain[1]) |> minmaxnorm .|> Gray
 
+D = (rand(400, 28*28) .- .5) ./ (28*28)
+
+D * ftrain[1]
+
+grad(D, ftrain[1])
+
+i = 1
+ftrain[3]
+
+D1 = (rand(400, 28*28) .- .5) ./ (28*28)
+D2 = (rand(2, 400) .- .5) ./ (28*28)
+norma(x) = x ./ sum(x)
 begin
-    D = (rand(400, 28*28) .- .5) ./ (28*28)
-    for i in 1:length(y)
-        G = grad(D, ftrain[i])
-        if y[i] == 0 | y[i] == 1
-            D = D .+ G .* .0001
-        else
-            D = D .- G .* .0001
+    for _ in 1:20
+        for i in 1:500
+            G1 = grad(D1, ftrain[i])
+            if y[i] == 0 || y[i] == 1 || y == 5
+                D1 = D1 .+ G1 .* .0001
+            else
+                D1 = D1 .- G1 .* .0001 * 1/5
+            end
+            G2 = grad(D2, norma(D1 * ftrain[i]))
+            if y[i] == 0 || y[i] == 1 || y == 5
+                D2 = D2 .+ G2 .* .0001
+            else
+                D2 = D2 .- G2 .* .0001 * 1 / 5
+            end
         end
     end
 end
+sinds = sortperm(y[1:500])
+fsy = (y[sinds])
+sy = fsy[1:116]
+full = ftrain[sinds]
+ftest = full[1:116]
+
+sum(y[1:500] .== 0)
+cla = [(D2 * norma(D1 * i)) for i in ftest]
+sy
+
+X = reduce(hcat, cla)
+w = pinv(X)'*sy
+sigmoid.(X'*w) .- sy |> @lf(sum(abs2, _))
+
+X = reduce(hcat, ftrain[1:116])
+w = pinv(X)'*sy
+sigmoid.(X'*w) .- sy |> @lf(sum(abs2, _))
+
+pnts = reduce(hcat, cla)'
+scatter(pnts[:, 1], pnts[:, 2], group = sy)
+
+fcla = [(D2 * norma(D1 * i)) for i in full]
+pnts = reduce(hcat, fcla)'
+scatter(pnts[:, 1], pnts[:, 2], group = fsy)
+
+Dc = CuArray(D1)
+img = CuArray.(ftrain[1:10])
+D1 * reduce(hcat, ftrain[1:500])
 
