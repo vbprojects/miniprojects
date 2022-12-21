@@ -47,7 +47,7 @@ ftrain[3]
 
 D1 = (rand(400, 28*28) .- .5) ./ (28*28)
 D2 = (rand(2, 400) .- .5) ./ (28*28)
-norma(x) = x ./ sum(x)
+normalize(x) = x ./ sum(x)
 begin
     for _ in 1:20
         for i in 1:500
