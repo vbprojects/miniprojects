@@ -1,4 +1,4 @@
-using LinearAlgebra, MLDatasets,  Images, LambdaFn, Base.Iterators
+using LinearAlgebra, MLDatasets,  Images, LambdaFn, Base.Iterators, Zygote, Plots
 
 #import MNIST DATA
 X, y = MNIST.traindata(Float32)
@@ -16,6 +16,8 @@ drelu(x) = x > 0 ? 1 : 0
 grad(W, x) = 2 .* relu.(W * x) .* drelu.(W * x) * x'
 pgrad(W, x) = 2 .* relu.(W * x) .* drelu.(W * x)
 sigmoid(x) = 1 / (1 + exp(-x))
+gilu(x) = 0.5 * x * (1 + tanh(sqrt(2/pi)*x + 0.044715*x^3))
+normalize(x) = x ./ sum(x)
 
 function minmaxnorm(x)
     minval = minimum(x)
@@ -23,26 +25,49 @@ function minmaxnorm(x)
     return (x .- minval) ./ (maxval - minval)
 end
 
-t_y = (y .== 1 .|| y .== 0)
-t_y = t_y .- (t_y .== 0) * sum(t_y) / length(t_y)
+t_y = (y .== 1 .|| y .== 5)
 
 hstack(x) = reduce(hcat, x) |> collect
+N = 5000
+D = (rand(200, 28*28) .- .5) ./ (28*28)
+oD = deepcopy(D)
 
-X = ftrain[1:32] |> hstack
+D2 = (rand(2, 200) .- .5) ./ (28*28)
 
-D = (rand(400, 28*28) .- .5) ./ (28*28)
+function obj(X, Y, D)
+    K = relu.(D * X)
+    pred = sigmoid.(diag(K' * K) .- .5)
+    dif = pred .- Y
+    dif' * dif
+end
 
-for _ in 1:10
-    for p in partition(1:length(y[1:500]), 32)
+for _ in 1:100
+    for p in partition(1:length(y[1:N]), 32)
         X = hstack(ftrain[p])
-        pt_y = t_y[p]
-        G = pgrad(D, X)
-        D .-= sum(.0001 * (G[:, i] * pt_y[i]) * X[:, i]' for i in 1:length(p))
+        Y = t_y[p]
+
+        G = gradient(D -> obj(X, Y, D), D)[1]
+        D .-= .0001 * G
+
+        X2 = relu.(D * X)
+
+        G2 = gradient(D -> obj(X2, Y, D), D2)[1]
+        D2 .-= .0001 * G2
     end
 end
 
-X = relu.(D * hstack(ftrain[1:500]))
-w = pinv(X)' * y[1:500]
-pred = sigmoid.(w'*X)
+D |> gvis
+oD |> gvis
 
-pred
+(D .- oD) .^ 2 |> gvis
+
+Y = t_y[1:N]
+X = hstack(ftrain[1:N])
+K = relu.(D * X)
+w = pinv(K)' * Y
+pred = (w'*K .- .5) .|> sigmoid |> @lf(_.>.5)
+(Y' .- pred) .^ 2 |> mean
+
+pnts = relu.(D2 * relu.(D * X))
+
+scatter(pnts[1, :], pnts[2, :], group=y[1:N]) 

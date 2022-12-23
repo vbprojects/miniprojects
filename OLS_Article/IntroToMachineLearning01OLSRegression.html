@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.1.189">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>All about OLS</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1.6em;
+  vertical-align: middle;
+}
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { color: #008000; } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { color: #008000; font-weight: bold; } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+
+<script src="IntroToMachineLearning01OLSRegression_files/libs/clipboard/clipboard.min.js"></script>
+<script src="IntroToMachineLearning01OLSRegression_files/libs/quarto-html/quarto.js"></script>
+<script src="IntroToMachineLearning01OLSRegression_files/libs/quarto-html/popper.min.js"></script>
+<script src="IntroToMachineLearning01OLSRegression_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="IntroToMachineLearning01OLSRegression_files/libs/quarto-html/anchor.min.js"></script>
+<link href="IntroToMachineLearning01OLSRegression_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="IntroToMachineLearning01OLSRegression_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="IntroToMachineLearning01OLSRegression_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="IntroToMachineLearning01OLSRegression_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="IntroToMachineLearning01OLSRegression_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+
+  <script>window.backupDefine = window.define; window.define = undefined;</script><script src="https://cdn.jsdelivr.net/npm/katex@0.15.1/dist/katex.min.js"></script>
+  <script>document.addEventListener("DOMContentLoaded", function () {
+ var mathElements = document.getElementsByClassName("math");
+ var macros = [];
+ for (var i = 0; i < mathElements.length; i++) {
+  var texText = mathElements[i].firstChild;
+  if (mathElements[i].tagName == "SPAN") {
+   katex.render(texText.data, mathElements[i], {
+    displayMode: mathElements[i].classList.contains('display'),
+    throwOnError: false,
+    macros: macros,
+    fleqn: false
+   });
+}}});
+  </script>
+  <script>window.define = window.backupDefine; window.backupDefine = undefined;</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.15.1/dist/katex.min.css">
+
+</head>
+
+<body>
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+<div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+  
+</div>
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">All about OLS</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+    
+  </div>
+  
+
+</header>
+
+<p>“At a basic level, machine learning is about predicting the future based on the past. For instance, you might wish to predict how much a user Alice will like a movie that she hasn’t seen, based on her ratings of movies that she has seen. This prediction could be based on many factors of the movies: their category (drama, documentary, etc.), the language, the director and actors, the production company, etc. In general, this means making informed guesses about some unobserved property of some object, based on observed properties of that object” - Hal Daumé III</p>
+<p>This is the first paragraph of the excellent book on machine learning <em>A Course in Machine Learning</em> by Hal Daumé III. The First chapter of the book delves into decision trees which is a great starting point, but we’re choosing a different one. We’re going to start with explaining the Ordinary Least Squares Regression which is also covered but gives in my opinion a less human centric view of creating models.</p>
+<p>Let’s start with defining what a model is in the context of machine learning. We will expand on the definition later, but for now a model is a guess about a target given some set of features. We denote a model here as <span class="math inline">\hat{y}</span>. We are given a set of targets, <span class="math inline">Y</span>, that correspond to a set of features given by <span class="math inline">X</span>. Notice we capitalize <span class="math inline">Y</span> and <span class="math inline">X</span> because we these variables are generally matrices. We want to assume that for every <span class="math inline">y_i = f(x_i) + \epsilon</span> where <span class="math inline">f(x_i)</span> is the true value and <span class="math inline">\epsilon</span> is noise or some amount of randomness. We want to find some model, <span class="math inline">\hat{y}</span>, where <span class="math inline">\hat{y} \approx f(x_i)</span>, or in other words, we want our guesses to be a close to the value of our target without noise. Notice that <span class="math inline">\hat{y}</span> could be anything. It does not need to be related to any features at all, we could have <span class="math inline">\hat{y}_i = 1</span> for all of our data if we wanted to.</p>
+<p>This isn’t explicitly machine learning but let’s try a simple modeling problem.</p>
+<div class="cell" data-execution_count="36">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">using</span> <span class="bu">Plots</span>, <span class="bu">LinearAlgebra</span>, <span class="bu">LaTeXStrings</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>The scatter plot shows our training data generated from the function <span class="math inline">y_i = 2x_i +\epsilon</span> where our truth is <span class="math inline">f(x_i) = 2x_i</span>. We attempt to find a model that estimates <span class="math inline">f(x_i)</span> as closely as possible.</p>
+<div class="cell" data-execution_count="37">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> <span class="op">-</span><span class="fl">1</span><span class="op">:</span><span class="fl">.01</span><span class="op">:</span><span class="fl">1</span> <span class="op">|&gt;</span> collect</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>Y <span class="op">=</span> <span class="fl">2</span> <span class="op">.*</span> X <span class="op">.+</span> <span class="fu">randn</span>(<span class="fu">length</span>(X)) <span class="op">*</span> <span class="fl">0.5</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(X, Y, seriestype <span class="op">=</span> <span class="op">:</span>scatter, xaxis <span class="op">=</span> (<span class="st">"features"</span>), yaxis <span class="op">=</span> (<span class="st">"target"</span>), legend <span class="op">=</span> <span class="cn">false</span>, framestyle <span class="op">=</span> <span class="op">:</span>origin)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="37">
+<p><img src="IntroToMachineLearning01OLSRegression_files/figure-html/cell-3-output-1.svg" class="img-fluid"></p>
+</div>
+</div>
+<p>If you didn’t already know the true value maybe you assume that it’s <span class="math inline">1.9x</span>.</p>
+<div class="cell" data-execution_count="38">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(X, Y, seriestype <span class="op">=</span> <span class="op">:</span>scatter, xaxis <span class="op">=</span> (<span class="st">"features"</span>), yaxis <span class="op">=</span> (<span class="st">"target"</span>), legend <span class="op">=</span> <span class="cn">false</span>, framestyle <span class="op">=</span> <span class="op">:</span>origin); <span class="fu">plot!</span>(x <span class="op">-&gt;</span> <span class="fl">1.9</span>x)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="38">
+<p><img src="IntroToMachineLearning01OLSRegression_files/figure-html/cell-4-output-1.svg" class="img-fluid"></p>
+</div>
+</div>
+<p>It looks right, and if you all you needed was an estimate for the general direction of the data it would work, but we’ll see the advantage of having a clearly defined metric later on. For right now lets try to find some metrics for evaluating our guess. One that’s immediately intuitive metric is adding up the errors of the model.</p>
+<div class="cell" data-execution_count="39">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>error <span class="op">=</span> <span class="fl">0</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (xi, yi) <span class="kw">in</span> <span class="fu">zip</span>(X, Y)</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    error <span class="op">+=</span> yi <span class="op">-</span> <span class="fl">1.9</span>xi</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="cf">end</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>error</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="39">
+<pre><code>-1.6097571579893621</code></pre>
+</div>
+</div>
+<p>The sum of the errors is around 5.05. Let’s make another guess, <span class="math inline">\hat{y_i} = 2.2x_i</span></p>
+<div class="cell" data-execution_count="40">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot!</span>(x <span class="op">-&gt;</span> <span class="fl">2.2</span>x)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="40">
+<p><img src="IntroToMachineLearning01OLSRegression_files/figure-html/cell-6-output-1.svg" class="img-fluid"></p>
+</div>
+</div>
+<div class="cell" data-execution_count="41">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>error <span class="op">=</span> <span class="fl">0</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (xi, yi) <span class="kw">in</span> <span class="fu">zip</span>(X, Y)</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    error <span class="op">+=</span> yi <span class="op">-</span> <span class="fl">2.2</span>xi</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="cf">end</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>error</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="41">
+<pre><code>-1.6097571579893613</code></pre>
+</div>
+</div>
+<p>Assuming we are only guessing lines with no intercepts of form <span class="math inline">\hat{y_i} = w*x_i</span> we can plot the relationship between the sum of errors of any given model <span class="math inline">\hat{y_i}</span> at <span class="math inline">w</span></p>
+<div class="cell" data-execution_count="42">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>errors <span class="op">=</span> <span class="fu">Dict</span>()</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> w <span class="kw">in</span> <span class="fl">0</span><span class="op">:</span><span class="fl">.01</span><span class="op">:</span><span class="fl">4</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    error <span class="op">=</span> <span class="fl">0</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> (xi, yi) <span class="kw">in</span> <span class="fu">zip</span>(X, Y)</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>        error <span class="op">+=</span> yi <span class="op">-</span> w<span class="op">*</span>xi</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">end</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>    errors[w] <span class="op">=</span> error</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a><span class="cf">end</span></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(errors, xaxis <span class="op">=</span> (<span class="st">"w"</span>), yaxis <span class="op">=</span> (<span class="st">"error"</span>), legend <span class="op">=</span> <span class="cn">false</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="42">
+<p><img src="IntroToMachineLearning01OLSRegression_files/figure-html/cell-8-output-1.svg" class="img-fluid"></p>
+</div>
+</div>
+<p>What a messy function. We can see a general trend in that as <span class="math inline">w</span> approaches 2 the error gets closer to 0, but that’s where the utility of this metric ends. We aren’t guaranteed a smaller error as we approach the value of <span class="math inline">w</span> that brings us closest to the true function. How do we even interpret negative error? If a line has both negative errors and positive errors this metric will cancel them out and that’s most likely what’s leading to the relatively small variations in the metric. Let’s try a different approach, taking the sum of the squares of the errors.</p>
+<div class="cell" data-execution_count="43">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>errors <span class="op">=</span> <span class="fu">Dict</span>()</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> w <span class="kw">in</span> <span class="fl">0</span><span class="op">:</span><span class="fl">.01</span><span class="op">:</span><span class="fl">4</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    error <span class="op">=</span> <span class="fl">0</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> (xi, yi) <span class="kw">in</span> <span class="fu">zip</span>(X, Y)</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>        error <span class="op">+=</span> (yi <span class="op">-</span> w<span class="op">*</span>xi)<span class="op">^</span><span class="fl">2</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">end</span></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>    errors[w] <span class="op">=</span> error</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a><span class="cf">end</span></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(errors, xaxis <span class="op">=</span> (<span class="st">"w"</span>), yaxis <span class="op">=</span> (<span class="st">"error"</span>), legend <span class="op">=</span> <span class="cn">false</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="43">
+<p><img src="IntroToMachineLearning01OLSRegression_files/figure-html/cell-9-output-1.svg" class="img-fluid"></p>
+</div>
+</div>
+<p>Much better. This metric continuously decreases as our model gets closer to the truth and also looks suspiciously like a parabola for which we have methods for finding the value of w that minimizes the function.</p>
+<p>I have a confession, we’ve been using the term metric wrong. Metric has a specific connotation within machine learning. The two “metrics” we’ve developed are more appropriately called loss functions. We can consider the first one just sum of errors, and it really isn’t a great loss function. The second one you might have seen before, the Sum of Squared Errors and the minimization of this function with respect to different models is generally called OLS (Ordinary Least Squares).</p>
+<p>You might be wondering why we didn’t just use the sum of absolute values of the errors, that loss function has its own applications that can be explained through the differences in the geometries of these functions.</p>
+<div class="cell" data-execution_count="44">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>errors <span class="op">=</span> <span class="fu">Dict</span>()</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> w <span class="kw">in</span> <span class="fl">0</span><span class="op">:</span><span class="fl">.01</span><span class="op">:</span><span class="fl">4</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    error <span class="op">=</span> <span class="fl">0</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> (xi, yi) <span class="kw">in</span> <span class="fu">zip</span>(X, Y)</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>        error <span class="op">+=</span> <span class="fu">abs</span>(yi <span class="op">-</span> w<span class="op">*</span>xi)</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">end</span></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>    errors[w] <span class="op">=</span> error</span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a><span class="cf">end</span></span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a><span class="fu">plot!</span>(errors, xaxis <span class="op">=</span> (<span class="st">"w"</span>), yaxis <span class="op">=</span> (<span class="st">"error"</span>), legend <span class="op">=</span> <span class="cn">false</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="44">
+<p><img src="IntroToMachineLearning01OLSRegression_files/figure-html/cell-10-output-1.svg" class="img-fluid"></p>
+</div>
+</div>
+<p>For now, we’ll stick to sum of squares. Let’s formally define and then expand SSE (Sum of Squared Error)</p>
+<p><span class="math inline">SSE = \sum_{i = 0}^{N} (y_i - \hat{y_i})^{2}</span></p>
+<p>For this example we define <span class="math inline">\hat{y_i} = w*x_i</span> Let’s take a step back and look at our model, in your general algebra 1 class you were probably asked to find the roots or zeros of a function by manipulating <span class="math inline">x</span>. For our purposes <span class="math inline">x_i</span> and <span class="math inline">y_i</span> are constants, we cannot manipulate them. We can only manipulate <span class="math inline">w</span>. We have names for <span class="math inline">X</span> and <span class="math inline">Y</span> (features and target), we also have a name for variables like <span class="math inline">w</span>, parameters. In OLS (Ordinary Least Squares) problems, we want to find the parameters (in this case w) of a model that minimize the SSE (Sum of Squared Errors). Let’s replace <span class="math inline">\hat{y_i}</span> with our equation.</p>
+<p><span class="math inline">SSE = \sum_{i = 0}^{N} (y_i - w*x_i)^{2}</span></p>
+<p>Expanding the inside of the polynomial gives us</p>
+<p><span class="math inline">SSE = \sum_{i = 0}^{N} (y_i^2 - 2*w*y_i*x_i + w^2 * x_i ^2)</span></p>
+<p>Getting closer to a regular parabola. Split up the summation.</p>
+<p><span class="math inline">SSE = \sum_{i = 0}^{N} (y_i^2) + \sum_{i = 0}^{N} (- 2*w*y_i*x_i) + \sum_{i = 0}^{N} (w^2 * x_i ^2)</span></p>
+<p>Take out the terms that aren’t being summed</p>
+<p><span class="math inline">SSE = \sum_{i = 0}^{N} (y_i^2) - 2 * w \sum_{i = 0}^{N} (y_i*x_i) + w^2 * \sum_{i = 0}^{N} (x_i ^2)</span></p>
+<p>Reorder the terms</p>
+<p><span class="math inline">SSE = w^2 * \sum_{i = 0}^{N} (x_i ^2) - 2 * w \sum_{i = 0}^{N} (y_i*x_i) + \sum_{i = 0}^{N} (y_i^2)</span></p>
+<p>And we get the shape we expected all along. SSE with this specific model can be described as quadratic function with respect to <span class="math inline">w</span>. Remember, <span class="math inline">X</span> and <span class="math inline">Y</span> are constants in regard to the loss function. Remembering a little more from algebra 1, for this quadratic function,</p>
+<p><span class="math inline">A = \sum_{i = 0}^{N} (x_i ^2)</span>,</p>
+<p><span class="math inline">B = - 2 * \sum_{i = 0}^{N} (y_i*x_i)</span></p>
+<p><span class="math inline">C = \sum_{i = 0}^{N} (y_i^2)</span></p>
+<p>Because <span class="math inline">A</span> is the sum of squares of <span class="math inline">X</span> it’s always going to be positive meaning the vertex is going to be the minimum value. Plot a few parabolas yourself, and you’ll see this true.</p>
+<div class="cell" data-execution_count="45">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(x <span class="op">-&gt;</span> x<span class="op">^</span><span class="fl">2</span> <span class="op">+</span> <span class="fl">2</span><span class="op">*</span>x <span class="op">+</span> <span class="fl">1</span>, framestyle <span class="op">=</span> <span class="op">:</span>origin); <span class="fu">plot!</span>(x <span class="op">-&gt;</span> x<span class="op">^</span><span class="fl">2</span> <span class="op">-</span> <span class="fl">2</span><span class="op">*</span>x <span class="op">+</span> <span class="fl">1</span>); <span class="fu">plot!</span>(x <span class="op">-&gt;</span> x<span class="op">^</span><span class="fl">2</span> <span class="op">+</span> <span class="fl">2</span><span class="op">*</span>x <span class="op">-</span> <span class="fl">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="45">
+<p><img src="IntroToMachineLearning01OLSRegression_files/figure-html/cell-11-output-1.svg" class="img-fluid"></p>
+</div>
+</div>
+<p>The equation for the vertex is</p>
+<p><span class="math inline">\frac{-B}{2*A}</span></p>
+<p>Substituting the values for <span class="math inline">B</span> and <span class="math inline">A</span> we get</p>
+<p><span class="math inline">\frac{\sum_{i = 0}^{N} (y_i*x_i)}{\sum_{i = 0}^{N} (x_i ^2)}</span></p>
+<div class="cell" data-execution_count="46">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>((yi<span class="op">*</span>xi) <span class="cf">for</span> (xi, yi) <span class="kw">in</span> <span class="fu">zip</span>(X, Y)) <span class="op">/</span> <span class="fu">sum</span>(xi<span class="op">^</span><span class="fl">2</span> <span class="cf">for</span> xi <span class="kw">in</span> X)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="46">
+<pre><code>1.9624178096653309</code></pre>
+</div>
+</div>
+<p>Not exactly 2.0 but remember the noise in this data set effects our efforts in getting the true value of the function.</p>
+<p>Lets consider another approach in minimizing SSE. You only need a little bit of calc 1 to get through this example but going forward you’ll need a strong background in multivariate calculus. For the most part we’ll derive the equation for the vertex.</p>
+<p>We’re going to take the derivative of the loss function with respect to w.</p>
+<p><span class="math inline">SSE = \sum_{i = 0}^{N} (y_i - w*x_i)^{2}</span></p>
+<p>It’s important to remember this is the loss of this model not of every model you come across.</p>
+<p>Using the power and chain rule we can do this in one step.</p>
+<p><span class="math inline">\frac{\partial SSE}{ \partial w} = 2 * \sum_{i = 0}^{N} (y_i - w*x_i)*(-x_i)</span></p>
+<p>Lets simplify this further</p>
+<p><span class="math inline">\frac{\partial SSE}{ \partial w} = 2 * \sum_{i = 0}^{N} (w*x_i^2 - x_i * y_i)</span></p>
+<p>Seperate the terms</p>
+<p><span class="math inline">\frac{\partial SSE}{ \partial w} = 2 * \sum_{i = 0}^{N} (w*x_i^2) - 2 * \sum_{i = 0}^{N} (x_i * y_i)</span></p>
+<p>Take out what can’t be summed</p>
+<p><span class="math inline">\frac{\partial SSE}{ \partial w} = 2w * \sum_{i = 0}^{N} (x_i^2) - 2 * \sum_{i = 0}^{N} (x_i * y_i)</span></p>
+<p>Can you see where this is going? Setting the derivative to 0 gives us the vertex of the polynomial which for reasons we have already established is a minimum, but within the context of calculus you can see that this point should be zero. If we take the second derivative of the equation we get</p>
+<p><span class="math inline">\frac{\partial^2 SSE}{ \partial^2 w} = 2 * \sum_{i = 0}^{N} (x_i^2)</span></p>
+<p>Which is a positive constant, in other words the second derivative of the turning point of the polynomial is going to be positive, therefore the turning point will be a minimum. This equation also only has one turning point with respect to <span class="math inline">w</span>, therefore this turning point will be the global minimum of the function.</p>
+<p>We get the turning point by setting the derivative to 0 and solving for w.</p>
+<p><span class="math inline">2w * \sum_{i = 0}^{N} (x_i^2) - 2 * \sum_{i = 0}^{N} (x_i * y_i) = 0</span></p>
+<p>Add the second term to both sides</p>
+<p><span class="math inline">2w * \sum_{i = 0}^{N} (x_i^2) = 2 * \sum_{i = 0}^{N} (x_i * y_i)</span></p>
+<p>divide the everything in the first term except <span class="math inline">w</span> on both sides</p>
+<p><span class="math inline">w = \frac{\sum_{i = 0}^{N} (x_i * y_i)}{\sum_{i = 0}^{N} (x_i^2)}</span></p>
+<p>We get the equation we solved for before, so why did we go through the trouble of proving the minimum of SSE for this model?</p>
+<p>Lets say instead of just solving for the slope we want the intercept too, ie. our model is</p>
+<p><span class="math inline">\hat{y_i} = w*x_i + b</span></p>
+<p>Lets change the data accordingly.</p>
+<p>The new truth (<span class="math inline">f(x)</span>) is going to be <span class="math inline">2x_i + 3</span></p>
+<div class="cell" data-execution_count="47">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>Y <span class="op">=</span> <span class="fl">2</span> <span class="op">.*</span> X <span class="op">.+</span> <span class="fl">3</span> <span class="op">.+</span> <span class="fu">randn</span>(<span class="fu">length</span>(X)) <span class="op">*</span> <span class="fl">0.5</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="fu">scatter</span>(X, Y, ylims <span class="op">=</span> (<span class="op">-</span><span class="fl">5</span>, <span class="fl">5</span>), legend <span class="op">=</span> <span class="cn">false</span>, framestyle <span class="op">=</span> <span class="op">:</span>origin)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="47">
+<p><img src="IntroToMachineLearning01OLSRegression_files/figure-html/cell-13-output-1.svg" class="img-fluid"></p>
+</div>
+</div>
+<p>We can plot the potential outputs of our old model</p>
+<div class="cell" data-execution_count="48">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>errors <span class="op">=</span> <span class="fu">Dict</span>()</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> w <span class="kw">in</span> <span class="fl">0</span><span class="op">:</span><span class="fl">.01</span><span class="op">:</span><span class="fl">4</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>    error <span class="op">=</span> <span class="fl">0</span></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> (xi, yi) <span class="kw">in</span> <span class="fu">zip</span>(X, Y)</span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>        error <span class="op">+=</span> (yi <span class="op">-</span> w<span class="op">*</span>xi)<span class="op">^</span><span class="fl">2</span></span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">end</span></span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>    errors[w] <span class="op">=</span> error</span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a><span class="cf">end</span></span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(errors, xaxis <span class="op">=</span> (<span class="st">"w"</span>), yaxis <span class="op">=</span> (<span class="st">"error"</span>), legend <span class="op">=</span> <span class="cn">false</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="48">
+<p><img src="IntroToMachineLearning01OLSRegression_files/figure-html/cell-14-output-1.svg" class="img-fluid"></p>
+</div>
+</div>
+<p>Notice the error is higher than our previous fit.</p>
+<p>We have 2 parameters now, (<span class="math inline">w</span> and <span class="math inline">b</span>). Our objective is to minimize SSE with respect to both paramaters. We can’t use our algebra 1 method for solving this equation. We’re going to need some multivar going forward.</p>
+<p>SSE is</p>
+<p><span class="math inline">SSE = \sum_{i = 0}^{N} (y_i - \hat{y_i})^{2}</span></p>
+<p>Substituting our new model we get.</p>
+<p><span class="math inline">SSE = \sum_{i = 0}^{N} (y_i - (w*x_i + b))^{2}</span></p>
+<p>Lets visualize the loss function given these 2 parameters</p>
+<div class="cell" data-execution_count="49">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fl">2</span><span class="op">:</span><span class="fl">.01</span><span class="op">:</span><span class="fl">4</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">.01</span><span class="op">:</span><span class="fl">3</span>, (b, w) <span class="op">-&gt;</span> <span class="fu">sum</span>((yi <span class="op">-</span> w<span class="op">*</span>xi <span class="op">-</span> b)<span class="op">^</span><span class="fl">2</span> <span class="cf">for</span> (xi, yi) <span class="kw">in</span> <span class="fu">zip</span>(X, Y)), st <span class="op">=</span> <span class="op">:</span>surface, xlabel <span class="op">=</span> <span class="st">"b"</span>, ylabel <span class="op">=</span> <span class="st">"w"</span>, zlabel <span class="op">=</span> <span class="st">"SSE"</span>, legend <span class="op">=</span> <span class="cn">false</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="49">
+<p><img src="IntroToMachineLearning01OLSRegression_files/figure-html/cell-15-output-1.svg" class="img-fluid"></p>
+</div>
+</div>
+<p>The loss is a paraboloid. While their most likely is an equation for the vertex of a paraboloid, the moment we start increasing parameters that equation becomes useless. We want a general way of finding the solution for OLS given a model like this.</p>
+<p><span class="math inline">SSE = \sum_{i = 0}^{N} (y_i - (w*x_i + b))^{2}</span></p>
+<p>Take the derivative with respect to w and b and solve for the parameters while setting the derivative to 0.</p>
+<p><span class="math inline">\frac{\partial SSE}{ \partial b} = 2 * \sum_{i = 0}^{N} (y_i - w*x_i - b)*(-1)</span></p>
+<p><span class="math inline">0 = \sum_{i = 0}^{N} (w*x_i + b - y_i)</span></p>
+<p><span class="math inline">0 = w*\sum_{i = 0}^{N}(x_i) + \sum_{i = 0}^{N}(b) - \sum_{i = 0}^{N}(y_i)</span></p>
+<p><span class="math inline">\sum_{i = 0}^{N}(b) = \sum_{i = 0}^{N}(y_i) - w*\sum_{i = 0}^{N}(x_i)</span></p>
+<p><span class="math inline">bN = \sum_{i = 0}^{N}(y_i) - w*\sum_{i = 0}^{N}(x_i)</span></p>
+<p><span class="math inline">b = \frac{\sum_{i = 0}^{N}(y_i) - w*\sum_{i = 0}^{N}(x_i)}{N}</span></p>
+<p>This is ugly, let’s fix that. The bar above the variable means we are taking the algebraic mean (average) of that variable, In other words $ = {x}$</p>
+<p><span class="math inline">b = \bar{y} - w*\bar{x}</span></p>
+<p>We need to solve for w and insert this somewhere.</p>
+<p><span class="math inline">\frac{\partial SSE}{ \partial w} = 2 * \sum_{i = 0}^{N} (y_i - w*x_i - b)*(-x_i)</span></p>
+<p><span class="math inline">0 = \sum_{i = 0}^{N} (y_i - w*x_i - \bar{y} + w*\bar{x})x_i</span></p>
+<p><span class="math inline">0 = \sum_{i = 0}^{N} (y_i - \bar{y})x_i - \sum_{i = 0}^{N} (w*x_i - w*\bar{x})x_i</span></p>
+<p><span class="math inline">\sum_{i = 0}^{N} (w*x_i - w*\bar{x})x_i = \sum_{i = 0}^{N} (y_i - \bar{y})x_i</span></p>
+<p><span class="math inline">w \sum_{i = 0}^{N} (x_i - \bar{x})x_i = \sum_{i = 0}^{N} (y_i - \bar{y})x_i</span></p>
+<p><span class="math inline">w = \frac{\sum_{i = 0}^{N} (y_i - \bar{y})x_i}{\sum_{i = 0}^{N} (x_i - \bar{x})x_i}</span></p>
+<p>Plug that back in to <span class="math inline">b</span></p>
+<p><span class="math inline">b = \bar{y} - \frac{\sum_{i = 0}^{N} (y_i - \bar{y})x_i}{\sum_{i = 0}^{N} (x_i - \bar{x})x_i}*\bar{x}</span></p>
+<p>Let’s try it out</p>
+<div class="cell" data-execution_count="50">
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>ybar <span class="op">=</span> <span class="fu">sum</span>(Y) <span class="op">/</span> <span class="fu">length</span>(Y)</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>xbar <span class="op">=</span> <span class="fu">sum</span>(X) <span class="op">/</span> <span class="fu">length</span>(X)</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>w <span class="op">=</span> <span class="fu">sum</span>((yi <span class="op">-</span> ybar)<span class="op">*</span>xi <span class="cf">for</span> (xi, yi) <span class="kw">in</span> <span class="fu">zip</span>(X, Y)) <span class="op">/</span> <span class="fu">sum</span>((xi <span class="op">-</span> xbar)<span class="op">*</span>xi <span class="cf">for</span> xi <span class="kw">in</span> X)</span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>b <span class="op">=</span> ybar <span class="op">-</span> w<span class="op">*</span>xbar</span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a><span class="fu">scatter</span>(X, Y, legend <span class="op">=</span> <span class="cn">false</span>, ylims <span class="op">=</span> (<span class="op">-</span><span class="fl">5</span>, <span class="fl">5</span>), framestyle <span class="op">=</span> <span class="op">:</span>origin)</span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a><span class="fu">plot!</span>(x <span class="op">-&gt;</span> w<span class="op">*</span>x <span class="op">+</span> b)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="50">
+<p><img src="IntroToMachineLearning01OLSRegression_files/figure-html/cell-16-output-1.svg" class="img-fluid"></p>
+</div>
+</div>
+<div class="cell" data-execution_count="51">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>(<span class="st">"w"</span> <span class="op">=&gt;</span> w, <span class="st">"b"</span> <span class="op">=&gt;</span> b)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="51">
+<pre><code>("w" =&gt; 2.0199647444294064, "b" =&gt; 2.971490925147424)</code></pre>
+</div>
+</div>
+<p>Compare this to the optimal solution found by our previous model</p>
+<div class="cell" data-execution_count="52">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>wo <span class="op">=</span> <span class="fu">sum</span>((yi<span class="op">*</span>xi) <span class="cf">for</span> (xi, yi) <span class="kw">in</span> <span class="fu">zip</span>(X, Y)) <span class="op">/</span> <span class="fu">sum</span>(xi<span class="op">^</span><span class="fl">2</span> <span class="cf">for</span> xi <span class="kw">in</span> X)</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot!</span>(x <span class="op">-&gt;</span> w<span class="op">*</span>x)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="52">
+<p><img src="IntroToMachineLearning01OLSRegression_files/figure-html/cell-18-output-1.svg" class="img-fluid"></p>
+</div>
+</div>
+<div class="cell" data-execution_count="53">
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>(<span class="st">"w"</span> <span class="op">=&gt;</span> w)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="53">
+<pre><code>"w" =&gt; 2.0199647444294064</code></pre>
+</div>
+</div>
+<div class="cell" data-execution_count="54">
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="op">-</span><span class="fl">1</span><span class="op">:</span><span class="fl">.01</span><span class="op">:</span><span class="fl">4</span>, <span class="op">-</span><span class="fl">1</span><span class="op">:</span><span class="fl">.01</span><span class="op">:</span><span class="fl">4</span>, (b, w) <span class="op">-&gt;</span> <span class="fu">sum</span>((yi <span class="op">-</span> w<span class="op">*</span>xi <span class="op">-</span> b)<span class="op">^</span><span class="fl">2</span> <span class="cf">for</span> (xi, yi) <span class="kw">in</span> <span class="fu">zip</span>(X, Y)), st <span class="op">=</span> <span class="op">:</span>surface, xlabel <span class="op">=</span> <span class="st">"b"</span>, ylabel <span class="op">=</span> <span class="st">"w"</span>, zlabel <span class="op">=</span> <span class="st">"SSE"</span>, legend <span class="op">=</span> <span class="cn">false</span>)</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a><span class="fu">scatter!</span>([b], [w], [<span class="fu">sum</span>((yi <span class="op">-</span> w<span class="op">*</span>xi <span class="op">-</span> b)<span class="op">^</span><span class="fl">2</span> for (xi, yi) <span class="kw">in</span> <span class="fu">zip</span>(X, Y))], markersize <span class="op">=</span> <span class="fl">3</span>, markerstrokewidth <span class="op">=</span> <span class="fl">1</span>)</span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a><span class="fu">scatter!</span>([<span class="fl">0</span>], [wo], [<span class="fu">sum</span>((yi <span class="op">-</span> wo<span class="op">*</span>xi)<span class="op">^</span><span class="fl">2</span> for (xi, yi) <span class="kw">in</span> <span class="fu">zip</span>(X, Y))], markersize <span class="op">=</span> <span class="fl">3</span>, markerstrokewidth <span class="op">=</span> <span class="fl">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="54">
+<p><img src="IntroToMachineLearning01OLSRegression_files/figure-html/cell-20-output-1.svg" class="img-fluid"></p>
+</div>
+</div>
+<p>The orange point is our new model while the green is our old model.</p>
+<p>Let’s look back at the equations for w and b we got</p>
+<p><span class="math inline">w = \frac{\sum_{i = 0}^{N} (y_i - \bar{y})x_i}{\sum_{i = 0}^{N} (x_i - \bar{x})x_i}</span></p>
+<p><span class="math inline">b = \bar{y} - \frac{\sum_{i = 0}^{N} (y_i - \bar{y})x_i}{\sum_{i = 0}^{N} (x_i - \bar{x})x_i}*\bar{x}</span></p>
+<p>You might have seen different equations used to represent these parameters. If you haven’t you might be wondering why we chose to use the mean of x and y within the equation. We have one more branch of math (you might find this specific opinion controversial) to introduce. My least favorite visitor, Statistics.</p>
+<p>Honestly it shouldn’t be that surprising that we’d eventually encounter statistics, when looking at our original equation for what we expect our data to be</p>
+<p><span class="math inline">y_i = f(x_i) + \epsilon_i</span></p>
+<p>Where <span class="math inline">\epsilon_i</span> is random, when we define the distribution of <span class="math inline">\epsilon_i</span> we get a different interpretation of OLS, SSE, and even SAE, Sum of Absolute Error.</p>
+<p>Substituting our model <span class="math inline">\hat{y_i} = w*x_i + b</span> as an approximation of <span class="math inline">f(x_i)</span> we get</p>
+<p><span class="math inline">y_i = w*x_i + b + \epsilon_i</span></p>
+<p>We can reorder this equation to be</p>
+<p><span class="math inline">\epsilon_i = y_i - w*x_i - b</span></p>
+<p>Here’s where we define the distribution of <span class="math inline">\epsilon_i</span>, we can choose multiple but for now we’ll use the normal distribution.</p>
+<p><span class="math inline">\epsilon_i \sim Normal(0, \sigma^2)</span></p>
+<p>Knowing that adding a nonrandom variable to a normal distribution shifts the mean that amount we can also conclude that.</p>
+<p><span class="math inline">y_i \sim Normal( w*x_i + b, \sigma^2)</span></p>
+<p>And through the use of maximum likelihood estimation, we can derive equations for these parameters. In a basic sense, maximum likelihood estimation is a method of finding the parameters of distribution that maximize the likelihood (straightforward I know) that some set of data follows said distribution. Given this distribution for <span class="math inline">y_i</span> we can conclude the probability of <span class="math inline">y_i</span> given <span class="math inline">x_i</span>, <span class="math inline">w</span>, and <span class="math inline">b</span> is</p>
+<p><span class="math inline">p(y_i | x_i; w, b, \sigma^2) = \frac{1}{\sqrt{2\pi\sigma^2}}e^{-(\frac{y_i - (w*x_i + b)}{\sigma})^2}</span></p>
+<p>I might be losing you, this next part isn’t getting any simpler. If you want a statistical understanding of these concepts you need a strong understanding of statistics. PennState offers course notes for its online versions of STAT 414 (Introduction to Probability Theory) and STAT 415 (Introduction to Mathematical Statistics). I’d recommend you read through all of it but here are some entry points for understanding the concept of maximum likelihood estimation</p>
+<p>https://online.stat.psu.edu/stat414/lesson/8</p>
+<p>https://online.stat.psu.edu/stat414/lesson/16</p>
+<p>https://online.stat.psu.edu/stat415/lesson/1/1.2</p>
+<p>Essentially, we want to maximize the likelihood that the data comes from the normal distribution. The likelihood of data is multiplication of the probabilities of each individual data point given that if is from said distribution. We have the probability of <span class="math inline">y_i</span> given <span class="math inline">x_i</span> with parameters <span class="math inline">w</span> and <span class="math inline">b</span>. Thus the likelihood is</p>
+<p><span class="math inline">\prod^{N}_{i = 0} p(y_i | x_i; w, b, \sigma^2)</span></p>
+<p>Which is equivalent to</p>
+<p><span class="math inline">\prod^{N}_{i = 0} \frac{1}{\sqrt{2\pi\sigma^2}}e^{-(\frac{y_i - (w*x_i + b)}{\sigma})^2}</span></p>
+<p>The likelihood the data comes from a distribution where <span class="math inline">w</span>, <span class="math inline">b</span>, and <span class="math inline">\sigma</span> are 1.5, 2, and 1 respectively</p>
+<div class="cell" data-execution_count="55">
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>w <span class="op">=</span> <span class="fl">2</span></span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>b <span class="op">=</span> <span class="fl">1.5</span></span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>σ <span class="op">=</span> <span class="fl">1</span></span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a><span class="fu">prod</span>([<span class="fl">1</span><span class="op">/</span><span class="fu">sqrt</span>(<span class="fl">2</span><span class="op">*</span><span class="cn">pi</span>) <span class="op">*</span> <span class="fu">exp</span>(<span class="fu">-1*</span>((y <span class="fu">-</span>(w<span class="op">*</span>x <span class="op">+</span> b)) <span class="op">/</span> σ)<span class="op">^</span><span class="fl">2</span>) for (x, y) <span class="kw">in</span> <span class="fu">zip</span>(X, Y)])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="55">
+<pre><code>1.6517281145334849e-292</code></pre>
+</div>
+</div>
+<p>Looks pretty low but remember probabilities are between 1 and 0, and we are multiplying 201 of them. Fixing <span class="math inline">b</span> and <span class="math inline">\sigma</span> at 1.5 and 1, we can plot the likelihoods of the distribution at different values of <span class="math inline">w</span> as</p>
+<div class="cell" data-execution_count="56">
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fl">0</span><span class="op">:</span><span class="fl">.01</span><span class="op">:</span><span class="fl">4</span>, [<span class="fu">prod</span>([<span class="fl">1</span><span class="op">/</span><span class="fu">sqrt</span>(<span class="fl">2</span><span class="op">*</span><span class="cn">pi</span>) <span class="op">*</span> <span class="fu">exp</span>(<span class="fu">-1*</span>((y <span class="fu">-</span>(w<span class="op">*</span>x <span class="op">+</span> b)) <span class="op">/</span> σ)<span class="op">^</span><span class="fl">2</span>) for (x, y) <span class="kw">in</span> <span class="fu">zip</span>(X, Y)]) for w <span class="kw">in</span> <span class="fl">0</span><span class="op">:</span><span class="fl">.01</span><span class="op">:</span><span class="fl">4</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="56">
+<p><img src="IntroToMachineLearning01OLSRegression_files/figure-html/cell-22-output-1.svg" class="img-fluid"></p>
+</div>
+</div>
+<p>By finding the combination of <span class="math inline">w</span> and <span class="math inline">b</span> that maximize the value of the likelihood, we get very close to the true value of the parameters.</p>
+<p>So how do we go about doing this?</p>
+<p>Taking the log of this expression gives us the log likelihood</p>
+<p><span class="math inline">\sum^{N}_{i=0} ln(\frac{1}{\sqrt{2\pi\sigma^2}}) -(\frac{y_i - (w*x_i + b)}{\sigma})^2</span></p>
+<p>Expanding this out a little gives us</p>
+<p><span class="math inline">ln(\frac{1}{\sqrt{2\pi\sigma^2}})*N + \sum^{N}_{i=0} -(\frac{y_i - (w*x_i + b)}{\sigma})^2</span></p>
+<p>Thus maximizing the log likelihood with respect to <span class="math inline">w</span> and <span class="math inline">b</span> means minimizing</p>
+<p><span class="math inline">\sum^{N}_{i=0} (\frac{y_i - (w*x_i + b)}{\sigma})^2</span></p>
+<p>Which is getting really close to our original SSE minimization problem. We can manipulate the expression a little more.</p>
+<p><span class="math inline">\sum^{N}_{i=0} (\frac{(y_i - (w*x_i + b)) ^ 2}{\sigma^2})</span></p>
+<p><span class="math inline">\frac{1}{\sigma^2}\sum^{N}_{i=0} (y_i - (w*x_i + b)) ^ 2</span></p>
+<p>And when we minimize this function with respect to the derivatives of <span class="math inline">w</span>, <span class="math inline">b</span>, and <span class="math inline">\sigma</span> becomes irrelevant. Thus we get our original problem.</p>
+<p><span class="math inline">\sum^{N}_{i=0} (y_i - (w*x_i + b)) ^ 2</span></p>
+<p>Notice how our model is self-contained thought the entire derivation. There’s no <span class="math inline">w</span>’s or <span class="math inline">b</span>’s spilling everywhere. This derivation can be extended to most models of this form. In other words, minimizing SSE for some deterministic model <span class="math inline">\hat{y_i}</span> is equivalent to treating the errors as independent and identically distributed variables with a Normal Distribution. Consider another choice for our distribution, the Laplace or double exponential distribution. Given this choice the probability of <span class="math inline">y_i</span> becomes</p>
+<p><span class="math inline">p(y_i|x_i; w, b, \lambda) = \frac{1}{2\lambda} e^{-\frac{| y_i - (w*x+b) |}{\lambda}}</span></p>
+<p>In which maximizing the log likelihood becomes minimizing</p>
+<p><span class="math inline">\sum^N_{i=0} | y_i - (w*x+b) |</span></p>
+<p>Or our Sum of Absolute Errors</p>
+<p>We have to make one last introduction, from this point on we’ll be using linear algebra to preform a multi variable linear regression using the model</p>
+<p><span class="math inline">\hat{y}_i = w ^ T x_i</span></p>
+<p>We make two crucial distinctions about our parameters and data. While we previously treated <span class="math inline">X</span> as a vector and <span class="math inline">x_i</span> as a scaler, we now will treat <span class="math inline">X</span> as a matrix and <span class="math inline">x_i</span> as row vector of <span class="math inline">X</span>, for example, take the matrix below.</p>
+<p><span class="math inline">\begin{bmatrix} 1 &amp; 2 \\ 3 &amp; 4 \\ 5 &amp; 6 \end{bmatrix}</span></p>
+<p><span class="math inline">x_1</span> is going to be the vector <span class="math inline">&lt;1, 2&gt;</span>,</p>
+<p><span class="math inline">x_2</span> is <span class="math inline">&lt;3, 4&gt;</span></p>
+<p><span class="math inline">x_3</span> is <span class="math inline">&lt;5, 6&gt;</span></p>
+<p>Because each row vector has 2 elements, and there are 3 vectors, we consider <span class="math inline">X \in R^{3 \times 2}</span> and <span class="math inline">x_i \in R^2</span>.</p>
+<p>As <span class="math inline">x_i</span> is in <span class="math inline">R^2</span>, in order for <span class="math inline">w^T x_i</span> to be valid <span class="math inline">w</span> needs to also be in <span class="math inline">R^2</span></p>
+<p>Let’s go over what <span class="math inline">w^T x_i</span> is, we refer to this one vector multiplied by the transpose of another vector as an inner product, and for this case, the dot product.</p>
+<p>We can represent this as <span class="math inline">\sum^{m}_j w_j * x_{i,j}</span>, or for our example in <span class="math inline">R^2</span></p>
+<p><span class="math inline">w_1 * x_{i, 1} + w_2 * x_{i, 2}</span></p>
+<p>For our example <span class="math inline">x_1</span>, if <span class="math inline">w = &lt;10, 11&gt;</span> then <span class="math inline">w^T x_1</span> is equal to</p>
+<p><span class="math inline">10 * 1 + 11 * 2</span></p>
+<p>We’ve been dealing with a single vector. We haven’t been dealing with multiple features yet, but if we rethink our previous problem we can see an immediate application of viewing our problem like this.</p>
+<p>Instead of representing <span class="math inline">X</span> as</p>
+<p><span class="math inline">\begin{bmatrix} 1 \\ 2 \\ 3 \end{bmatrix}</span></p>
+<p>We will now refer to this vector as <span class="math inline">x_v</span></p>
+<p>If we add a column of ones we get</p>
+<p><span class="math inline">\begin{bmatrix} 1 &amp; 1\\ 2 &amp; 1 \\ 3 &amp; 1 \end{bmatrix}</span></p>
+<p>And when we take <span class="math inline">w^T x_i</span> we get</p>
+<p><span class="math inline">w_1 * x_{i, 1} + w_2*1</span> or simply</p>
+<p><span class="math inline">w_1 * x_{i, 1} + w_2</span> which is the same is equivalent to our previous model</p>
+<p><span class="math inline">w * x_{v, i} + b</span></p>
+<p>If we add another column <span class="math inline">x_i^2</span> we get the matrix</p>
+<p><span class="math inline">\begin{bmatrix} 1 &amp; 1 &amp; 1\\ 4 &amp; 2 &amp; 1 \\ 9 &amp; 3 &amp; 1 \end{bmatrix}</span></p>
+<p><span class="math inline">w_1 * x_{i, 1} + w_2 * x_{i, 2} + w_3</span></p>
+<p>which is equivalent to</p>
+<p><span class="math inline">w_1 * x_{v, i}^2 + w_2 * x_{v, i} + b</span></p>
+<p>Which means we can now fit quadratic functions accurately.</p>
+<p>We can add more columns to fit data to nearly any polynomial, but we’re getting a little ahead of ourselves, let’s derive the closed form solution for this problem.</p>
+<p>Looking at our regular SSE formula we have</p>
+<p><span class="math inline">\sum^N_i (y_i - w^T x_i)^2</span></p>
+<p><span class="math inline">w^T X</span> is going to be a vector of each of the inner product of the row vectors of the matrix X and w, or</p>
+<p><span class="math inline">\begin{bmatrix} w ^ T x_1 \\ w ^ T x_2 \\ w ^ T x_3 \\ ... \end{bmatrix}</span></p>
+<p>and we already know that <span class="math inline">Y</span> corrosponds to</p>
+<p><span class="math inline">\begin{bmatrix} y_1 \\ y_2 \\ y_3 \\ ... \end{bmatrix}</span></p>
+<p>So <span class="math inline">Y - w X</span> is equivalent to</p>
+<p><span class="math inline">\begin{bmatrix} y_1 - w ^ T x_1 \\ y_2 - w ^ T x_2 \\ y_3 - w ^ T x_3 \\ ... \end{bmatrix}</span></p>
+<p>and</p>
+<p><span class="math inline">\sum^N_i (y_i - w^T x_i)</span></p>
+<p>Is just the sum of the elements in the vector <span class="math inline">Y - w^T X</span> or the inner product of</p>
+<p><span class="math inline">(Y - w X)^T \: \overrightarrow{1}</span></p>
+<p>Where <span class="math inline">\overrightarrow{1}</span> is just a vector of ones or <span class="math inline">&lt;1, 1, 1, 1, ...&gt;</span> to whatever dimension <span class="math inline">(Y - w X)</span></p>
+<p>Notice we haven’t squared the errors yet.</p>
+<p><span class="math inline">\sum^N_i (y_i - w^T x_i)^2</span> is equivalent to <span class="math inline">(Y - w X)^T (Y - w X)</span></p>
+<p>Going back to our matrix</p>
+<p><span class="math inline">Y - w X</span> is</p>
+<p><span class="math inline">\begin{bmatrix} y_1 - w ^ T x_1 \\ y_2 - w ^ T x_2 \\ y_3 - w ^ T x_3 \\ ... \end{bmatrix}</span></p>
+<p>Thus <span class="math inline">(Y - w X)^T (Y - w X)</span></p>
+<p>is</p>
+<p><span class="math inline">(y_1 - w ^ T x_1) * (y_1 - w ^ T x_1) + (y_2- w ^ T x_2) * (y_2 - w ^ T x_2) ...</span></p>
+<p>Which is equivalent to <span class="math inline">\sum^N_i (y_i - w^T x_i)^2</span></p>
+<p>So</p>
+<p><span class="math inline">SSE = (Y - w X)^T (Y - w X)</span></p>
+<p>As we go on, you’ll be able to see some similarities between multiplication, inner products, and the properties of transposes. There are alot of properties of matrix multiplication and transposes that can be unintuitive so lets take this step by step.</p>
+<p><span class="math inline">SSE = (Y - w X)^T (Y - w X)</span></p>
+<p>We distribute the first transpose to the terms of the first parenthetical</p>
+<p><span class="math inline">SSE = (Y^T - X^T w^T) (Y - w X)</span></p>
+<p>We foil the expression like we would an algebraic polynomial</p>
+<p><span class="math inline">SSE = Y^T Y - Y^T w X - X^T w^T Y - X^T w^T w X</span></p>
+<p>We observe that <span class="math inline">Y^T w X</span> and <span class="math inline">X^T w^T Y</span> both simplify to a variable in <span class="math inline">R^1</span> and that <span class="math inline">(X^T w^T Y) ^ T = Y^T w X</span>. Let’s say they both evaluate to some value <span class="math inline">a</span>. The equation becomes <span class="math inline">a^T = a</span> where <span class="math inline">a \in R^1</span>. The transpose of elements in the set <span class="math inline">R^1</span> is equal to the element. Thus, <span class="math inline">X^T w^T Y = Y^T w X</span> and</p>
+<p><span class="math inline">SSE = Y^T Y - 2Y^T w X + X^T w^T w X</span></p>
+<p>Taking the gradient with respect to <span class="math inline">w</span> gives us</p>
+<p><span class="math inline">\frac{\partial SSE}{\partial w} = -2Y^T X + 2 X^T w^T X</span></p>
+<p>For some intuition on this <span class="math inline">w^T w</span> could be thought of as <span class="math inline">w^2</span></p>
+<p>Set the gradient to 0</p>
+<p><span class="math inline">0 = -2Y^T X - 2 X^T X w</span></p>
+<p>Take out the constants</p>
+<p><span class="math inline">0 = -Y^T X + X^T X w</span></p>
+<p>Solve for w</p>
+<p><span class="math inline">Y^T X = X^T X w</span></p>
+<p><span class="math inline">X^T X w = Y^T X</span></p>
+<p><span class="math inline">w = (X^T X)^{-1} Y^T X</span></p>
+<p>And we have our general solution for multivariable linear regressions</p>
+<div class="cell" data-execution_count="57">
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>xv <span class="op">=</span> X</span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>Xn <span class="op">=</span> <span class="fu">hcat</span>(xv, X <span class="op">.^</span> <span class="fl">0</span>)</span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>w <span class="op">=</span> <span class="fu">inv</span>(Xn<span class="op">'</span>Xn)<span class="op">*</span>Xn<span class="op">'</span>Y</span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a><span class="fu">scatter</span>(X, Y, framestyle <span class="op">=</span> <span class="op">:</span>origin, legend <span class="op">=</span> <span class="cn">false</span>)</span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a><span class="fu">plot!</span>(x <span class="op">-&gt;</span> w[<span class="fl">1</span>]<span class="op">*</span>x <span class="op">+</span> w[<span class="fl">2</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="57">
+<p><img src="IntroToMachineLearning01OLSRegression_files/figure-html/cell-23-output-1.svg" class="img-fluid"></p>
+</div>
+</div>
+<div class="cell" data-execution_count="58">
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="st">"y = </span><span class="sc">$</span>(w[<span class="fl">1</span>])<span class="st">x + </span><span class="sc">$</span>(w[<span class="fl">2</span>])<span class="st">"</span>, <span class="st">"SSE = </span><span class="sc">$</span>((Y <span class="op">-</span> Xn<span class="op">*</span>w)<span class="ch">' * (Y - Xn*w))"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="58">
+<pre><code>("y = 2.0199647444294087x + 2.971490925147423", "SSE = 51.8970131427807")</code></pre>
+</div>
+</div>
+<p>Using this same method, lets try fitting quadtratic data</p>
+<div class="cell" data-execution_count="59">
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>xv <span class="op">=</span> X</span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>Y <span class="op">=</span> <span class="fl">3</span> <span class="op">.*</span> xv <span class="op">.^</span> <span class="fl">2</span> <span class="op">+</span> <span class="fl">2</span> <span class="op">.*</span> xv <span class="op">.+</span> <span class="fl">1</span> <span class="op">.+</span> <span class="fu">randn</span>(<span class="fu">length</span>(X)) <span class="op">*</span> <span class="fl">0.3</span></span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>Xn <span class="op">=</span> <span class="fu">hcat</span>(xv, X <span class="op">.^</span> <span class="fl">0</span>)</span>
+<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a>w <span class="op">=</span> <span class="fu">inv</span>(Xn<span class="op">'</span>Xn)<span class="op">*</span>Xn<span class="op">'</span>Y</span>
+<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a><span class="fu">scatter</span>(X, Y, framestyle <span class="op">=</span> <span class="op">:</span>origin, legend <span class="op">=</span> <span class="cn">false</span>)</span>
+<span id="cb31-6"><a href="#cb31-6" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="st">"y = </span><span class="sc">$</span>(w[<span class="fl">1</span>])<span class="st">x + </span><span class="sc">$</span>(w[<span class="fl">2</span>])<span class="st">"</span>, <span class="st">" SSE = </span><span class="sc">$</span>((Y <span class="op">-</span> Xn<span class="op">*</span>w)<span class="ch">' * (Y - Xn*w))")</span></span>
+<span id="cb31-7"><a href="#cb31-7" aria-hidden="true" tabindex="-1"></a><span class="fu">plot!</span>(x <span class="op">-&gt;</span> w[<span class="fl">1</span>]<span class="op">*</span>x <span class="op">+</span> w[<span class="fl">2</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>y = 1.9775956644033128x + 1.9902318689281158 SSE = 167.09835002975353</code></pre>
+</div>
+<div class="cell-output cell-output-display" data-execution_count="59">
+<p><img src="IntroToMachineLearning01OLSRegression_files/figure-html/cell-25-output-2.svg" class="img-fluid"></p>
+</div>
+</div>
+<p>Lets add an <span class="math inline">x^2</span> column to our matrix</p>
+<div class="cell" data-execution_count="60">
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>xv <span class="op">=</span> X</span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>Y <span class="op">=</span> <span class="fl">3</span> <span class="op">.*</span> xv <span class="op">.^</span> <span class="fl">2</span> <span class="op">+</span> <span class="fl">2</span> <span class="op">.*</span> xv <span class="op">.+</span> <span class="fl">1</span> <span class="op">.+</span> <span class="fu">randn</span>(<span class="fu">length</span>(X)) <span class="op">*</span> <span class="fl">0.3</span></span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>Xn <span class="op">=</span> <span class="fu">hcat</span>(xv <span class="op">.^</span><span class="fl">2</span>, xv, X <span class="op">.^</span> <span class="fl">0</span>)</span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a>w <span class="op">=</span> <span class="fu">inv</span>(Xn<span class="op">'</span>Xn)<span class="op">*</span>Xn<span class="op">'</span>Y</span>
+<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a><span class="fu">scatter</span>(X, Y, framestyle <span class="op">=</span> <span class="op">:</span>origin, legend <span class="op">=</span> <span class="cn">false</span>)</span>
+<span id="cb33-6"><a href="#cb33-6" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="st">"y = </span><span class="sc">$</span>(w[<span class="fl">1</span>])<span class="st">x^2 + </span><span class="sc">$</span>(w[<span class="fl">2</span>])<span class="st">x + </span><span class="sc">$</span>(w[<span class="fl">3</span>])<span class="st">"</span>, <span class="st">" SSE = </span><span class="sc">$</span>((Y <span class="op">-</span> Xn<span class="op">*</span>w)<span class="ch">' * (Y - Xn*w))")</span></span>
+<span id="cb33-7"><a href="#cb33-7" aria-hidden="true" tabindex="-1"></a><span class="fu">plot!</span>(x <span class="op">-&gt;</span> w[<span class="fl">1</span>]<span class="op">*</span>x<span class="op">^</span><span class="fl">2</span> <span class="op">+</span> w[<span class="fl">2</span>]<span class="op">*</span>x <span class="op">+</span> w[<span class="fl">3</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>y = 3.047025916094448x^2 + 1.9767385274041585x + 0.989739981181494 SSE = 17.287928758692843</code></pre>
+</div>
+<div class="cell-output cell-output-display" data-execution_count="60">
+<p><img src="IntroToMachineLearning01OLSRegression_files/figure-html/cell-26-output-2.svg" class="img-fluid"></p>
+</div>
+</div>
+<p>One of the most important realizations you should make about linear regression and other linear methods is that the word “linear” refers to the linear combination of variables. Given the right <b>feature engineering</b>, remember we call the columns of our data matrix <span class="math inline">X</span> features, we can model more than just lines. Adding a <span class="math inline">x^2</span> and constant column does not make this nonlinear, it just makes it not a line. Despite their linearity, this family of models is more than capable of producing a large variety of versatile regressions.</p>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    target: function(trigger) {
+      return trigger.previousElementSibling;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    setTimeout(function() {
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const cites = ref.parentNode.getAttribute('data-cites').split(' ');
+    tippyHover(ref, function() {
+      var popup = window.document.createElement('div');
+      cites.forEach(function(cite) {
+        var citeDiv = window.document.createElement('div');
+        citeDiv.classList.add('hanging-indent');
+        citeDiv.classList.add('csl-entry');
+        var biblioDiv = window.document.getElementById('ref-' + cite);
+        if (biblioDiv) {
+          citeDiv.innerHTML = biblioDiv.innerHTML;
+        }
+        popup.appendChild(citeDiv);
+      });
+      return popup.innerHTML;
+    });
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>
