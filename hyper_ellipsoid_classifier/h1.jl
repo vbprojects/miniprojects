@@ -25,9 +25,9 @@ begin
     for _ in 1:1000
         push!(losses, loss(w, b, X, Y))
         g = grad(w, b, X, Y)
-        w -= 0.01 * g[1]
-        b -= 0.01 * g[2]
+        w -= 0.001 * g[1]
+        b -= 0.001 * g[2]
     end
 end
 
-plot(losses)
+plot(losses[10:end])
