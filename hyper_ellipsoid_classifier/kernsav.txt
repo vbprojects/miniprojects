@@ -1,0 +1,1 @@
+kern(x, y) = exp(cas(norm(x .- y) * 5))
