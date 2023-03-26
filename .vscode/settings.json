@@ -1,0 +1,13 @@
+{
+    "grammarly.selectors": [
+        {
+            "language": "markdown",
+            "scheme": "vscode-notebook-cell",
+            "pattern": "e:\\github\\miniprojects\\hyper_ellipsoid_classifier\\hyperellipsoidarticle.ipynb"
+        },
+        {
+            "language": "markdown",
+            "scheme": "vscode-notebook-cell"
+        }
+    ]
+}
